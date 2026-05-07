@@ -6,7 +6,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Count, Max, Q
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -52,6 +52,13 @@ def parse_byte_range(range_header, size):
     if start >= size:
         return None
     return start, min(end, size - 1)
+
+
+def filename_for_post(post):
+    suffix = Path(post.file.name or post.external_url or "").suffix
+    if not suffix:
+        suffix = ".mp4" if post.media_type == MediaPost.MediaType.VIDEO else ".jpg"
+    return f"{post.event.slug}-{post.id}{suffix}"
 
 
 def get_default_event():
@@ -490,6 +497,35 @@ def drive_media(request, file_name):
         if status == 206:
             response["Content-Range"] = f"bytes {start}-{end}/{size}"
     return response
+
+
+@require_guest
+def download_media_post(request, post_id):
+    post = get_object_or_404(
+        MediaPost,
+        id=post_id,
+        event=request.wedding_event,
+        status=MediaPost.Status.APPROVED,
+    )
+    filename = filename_for_post(post)
+
+    if post.file and post.file.name.startswith("gdrive/"):
+        file_id = Path(post.file.name).name.split(".", 1)[0]
+        storage = GoogleDriveStorage()
+        metadata = storage.get_file_metadata(file_id)
+        drive_response, content = storage.read_file(file_id)
+        if int(drive_response.status) >= 400:
+            raise Http404()
+
+        response = HttpResponse(content, content_type=metadata.get("mimeType") or "application/octet-stream")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["Content-Length"] = str(len(content))
+        return response
+
+    if post.file:
+        return FileResponse(post.file.open("rb"), as_attachment=True, filename=filename)
+
+    return redirect(post.external_url)
 
 
 @require_host_guest

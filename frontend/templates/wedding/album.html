@@ -62,7 +62,7 @@
                 </button>
               </form>
             {% endif %}
-            <a class="text-button" href="{{ post.media_url }}" download target="_blank" rel="noopener" aria-label="Скачать медиа">
+            <a class="text-button" href="{% url 'wedding:download_media_post' post.id %}" aria-label="Скачать медиа">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               <span>Скачать</span>
             </a>

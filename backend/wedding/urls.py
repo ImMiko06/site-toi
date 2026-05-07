@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/seating/move/", views.move_guest_table, name="move_guest_table"),
     path("api/tables/", views.tables_api, name="tables_api"),
     path("posts/<int:post_id>/delete/", views.delete_media_post, name="delete_media_post"),
+    path("posts/<int:post_id>/download/", views.download_media_post, name="download_media_post"),
     path("posts/<int:post_id>/like/", views.toggle_like, name="toggle_like"),
     path("posts/<int:post_id>/comment/", views.add_comment, name="add_comment"),
 ]
