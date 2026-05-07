@@ -14,6 +14,7 @@ urlpatterns = [
     path("authors/<int:guest_id>/", views.author_detail, name="author_detail"),
     path("upload/", views.upload, name="upload"),
     path("studio/", views.studio, name="studio"),
+    path("drive-check/", views.drive_check, name="drive_check"),
     path("drive-media/<path:file_name>", views.drive_media, name="drive_media"),
     path("upload/request-access/", views.request_upload_access, name="request_upload_access"),
     path("account/", views.account, name="account"),

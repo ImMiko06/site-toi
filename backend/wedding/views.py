@@ -371,6 +371,7 @@ def home(request):
             status=MediaPost.Status.APPROVED,
             media_type=MediaPost.MediaType.PHOTO,
         )
+        .exclude(external_url__startswith="/static/wedding/img/")
         .select_related("author")
         .order_by("-created_at")[:4]
     )
@@ -491,6 +492,47 @@ def drive_media(request, file_name):
     return response
 
 
+@require_host_guest
+def drive_check(request):
+    data = {
+        "use_google_drive_media": settings.USE_GOOGLE_DRIVE_MEDIA,
+        "has_token_json": bool(settings.GOOGLE_DRIVE_TOKEN_JSON),
+        "token_json_length": len(settings.GOOGLE_DRIVE_TOKEN_JSON),
+        "token_file_exists": Path(settings.GOOGLE_DRIVE_TOKEN_FILE).exists(),
+        "folder_id": settings.GOOGLE_DRIVE_FOLDER_ID,
+    }
+
+    if settings.GOOGLE_DRIVE_TOKEN_JSON:
+        try:
+            token_data = json.loads(settings.GOOGLE_DRIVE_TOKEN_JSON)
+            data["token_json_valid"] = True
+            data["token_has_refresh_token"] = bool(token_data.get("refresh_token"))
+            data["token_client_id_tail"] = (token_data.get("client_id") or "")[-12:]
+            data["token_scopes"] = token_data.get("scopes", [])
+        except json.JSONDecodeError as error:
+            data["token_json_valid"] = False
+            data["token_json_error"] = str(error)
+
+    try:
+        storage = GoogleDriveStorage()
+        service = storage._get_service()
+        about = service.about().get(fields="user").execute(num_retries=1)
+        folder = service.files().get(
+            fileId=settings.GOOGLE_DRIVE_FOLDER_ID,
+            fields="id,name,mimeType",
+            supportsAllDrives=settings.GOOGLE_DRIVE_SUPPORTS_ALL_DRIVES,
+        ).execute(num_retries=1)
+        data["google_ok"] = True
+        data["google_user"] = about.get("user", {}).get("emailAddress")
+        data["folder"] = folder
+    except Exception as error:
+        data["google_ok"] = False
+        data["error_type"] = error.__class__.__name__
+        data["error"] = str(error)[:1000]
+
+    return JsonResponse(data, json_dumps_params={"ensure_ascii": False, "indent": 2})
+
+
 @require_guest
 def album(request):
     sort = request.GET.get("sort", "feed")
@@ -555,11 +597,12 @@ def upload(request):
             try:
                 post.save()
             except Exception as error:
-                if not is_timeout_error(error):
-                    raise
+                message = "Не получилось загрузить файл в Google Drive. Проверьте токен и попробуйте еще раз."
+                if is_timeout_error(error):
+                    message = "Google Drive долго не отвечает. Попробуйте еще раз или загрузите файл меньшего размера."
                 messages.error(
                     request,
-                    "Google Drive долго не отвечает. Попробуйте еще раз или загрузите файл меньшего размера.",
+                    message,
                 )
                 return redirect("wedding:upload")
             messages.success(request, "Момент добавлен в живую ленту.")
