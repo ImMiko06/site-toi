@@ -330,6 +330,7 @@ def home(request):
             status=MediaPost.Status.APPROVED,
             media_type=MediaPost.MediaType.PHOTO,
         )
+        .exclude(external_url__startswith="/static/wedding/img/")
         .select_related("author")
         .order_by("-created_at")[:4]
     )
@@ -514,11 +515,12 @@ def upload(request):
             try:
                 post.save()
             except Exception as error:
-                if not is_timeout_error(error):
-                    raise
+                message = "Не получилось загрузить файл в Google Drive. Проверьте токен и попробуйте еще раз."
+                if is_timeout_error(error):
+                    message = "Google Drive долго не отвечает. Попробуйте еще раз или загрузите файл меньшего размера."
                 messages.error(
                     request,
-                    "Google Drive долго не отвечает. Попробуйте еще раз или загрузите файл меньшего размера.",
+                    message,
                 )
                 return redirect("wedding:upload")
             messages.success(request, "Момент добавлен в живую ленту.")

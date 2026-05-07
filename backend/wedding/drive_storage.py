@@ -37,15 +37,18 @@ class GoogleDriveStorage(Storage):
                 ) from error
 
             scopes = ["https://www.googleapis.com/auth/drive"]
+            should_persist_token = False
             if settings.GOOGLE_DRIVE_TOKEN_JSON:
                 credentials = Credentials.from_authorized_user_info(json.loads(settings.GOOGLE_DRIVE_TOKEN_JSON), scopes)
             elif os.path.exists(settings.GOOGLE_DRIVE_TOKEN_FILE):
                 credentials = Credentials.from_authorized_user_file(settings.GOOGLE_DRIVE_TOKEN_FILE, scopes)
+                should_persist_token = True
             else:
                 credentials, _ = google.auth.default(scopes=scopes)
             if credentials.expired and credentials.refresh_token:
                 credentials.refresh(Request())
-                Path(settings.GOOGLE_DRIVE_TOKEN_FILE).write_text(credentials.to_json(), encoding="utf-8")
+                if should_persist_token:
+                    Path(settings.GOOGLE_DRIVE_TOKEN_FILE).write_text(credentials.to_json(), encoding="utf-8")
             http = httplib2.Http(timeout=settings.GOOGLE_DRIVE_TIMEOUT_SECONDS)
             authed_http = google_auth_httplib2.AuthorizedHttp(credentials, http=http)
             self._http = authed_http
