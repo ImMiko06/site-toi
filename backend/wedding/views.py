@@ -78,6 +78,7 @@ def get_default_event():
         create_demo_data(event)
 
     ensure_event_details(event)
+    ensure_banquet_tables(event)
     ensure_host_guest(event)
     ensure_gallery_samples(event)
 
@@ -101,6 +102,46 @@ def ensure_event_details(event):
             changed.append(field)
     if changed:
         event.save(update_fields=changed + ["updated_at"])
+
+
+def ensure_banquet_tables(event):
+    table_specs = [
+        (1, "VIP 1", True),
+        (2, "Родители", True),
+        (3, "Родственники", False),
+        (4, "Құдалар", True),
+        (5, "Друзья семьи", False),
+        (6, "Родня", False),
+        (7, "Друзья жениха", False),
+        (8, "Друзья невесты", False),
+        (9, "Коллеги пары", False),
+        (10, "Соседи", False),
+        (11, "Гости 11", False),
+        (12, "Гости 12", False),
+    ]
+    for number, name, is_vip in table_specs:
+        table, created = ReceptionTable.objects.get_or_create(
+            event=event,
+            number=number,
+            defaults={
+                "name": name,
+                "capacity": 12,
+                "is_vip": is_vip,
+                "position_x": 50,
+                "position_y": 50,
+            },
+        )
+        updates = []
+        if table.capacity < 10:
+            table.capacity = 12
+            updates.append("capacity")
+        if number in {1, 2, 4} and not table.is_vip:
+            table.is_vip = True
+            updates.append("is_vip")
+        if created:
+            continue
+        if updates:
+            table.save(update_fields=updates)
 
 
 def ensure_gallery_samples(event):

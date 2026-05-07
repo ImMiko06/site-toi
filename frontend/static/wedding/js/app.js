@@ -1,13 +1,61 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const revealTargets = document.querySelectorAll(
+    ".page-header, .couple-hero, .home-info-grid article, .location-card, .event-time-card, .section, .post-card, .author-row, .upload-card, .locked-card, .access-request-card, .profile-head, .account-actions, .manage-card, .host-form-card"
+  );
+
+  if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }
+    );
+
+    revealTargets.forEach((target, index) => {
+      target.classList.add("reveal-item");
+      target.style.setProperty("--reveal-delay", `${Math.min(index % 6, 5) * 55}ms`);
+      revealObserver.observe(target);
+    });
+  } else {
+    revealTargets.forEach((target) => target.classList.add("is-visible"));
+  }
+
   const invite = document.querySelector("[data-invite-modal]");
   if (invite) {
     const key = invite.dataset.inviteKey;
     if (sessionStorage.getItem(key) !== "closed") {
       invite.classList.add("is-open");
     }
+
+    const openInvite = () => {
+      sessionStorage.removeItem(key);
+      invite.classList.add("is-open");
+    };
+
+    document.querySelectorAll("[data-invite-open]").forEach((trigger) => {
+      trigger.addEventListener("click", openInvite);
+      trigger.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openInvite();
+        }
+      });
+    });
+
     invite.querySelector("[data-invite-close]")?.addEventListener("click", () => {
       sessionStorage.setItem(key, "closed");
       invite.classList.remove("is-open");
+    });
+
+    invite.addEventListener("click", (event) => {
+      if (event.target === invite) {
+        sessionStorage.setItem(key, "closed");
+        invite.classList.remove("is-open");
+      }
     });
   }
 
@@ -48,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
   startInviteCountdown();
 
   const tableMap = document.querySelector("[data-table-map]");
-  const tableButtons = Array.from(document.querySelectorAll(".table-circle"));
+  const tableButtons = Array.from(document.querySelectorAll(".table-circle, .venue-table"));
 
   tableButtons.forEach((table) => {
     const occupied = Number(table.dataset.guestCount || 0);

@@ -16,6 +16,10 @@
       <p class="eyebrow">Wedding day</p>
       <h2>{{ event.bride_name }} & {{ event.groom_name }}</h2>
       <p>{{ event.invitation_text }}</p>
+      <div class="hero-actions">
+        <a class="primary-button" href="{% url 'wedding:album' %}">Открыть альбом</a>
+        <a class="secondary-button" href="{% url 'wedding:upload' %}">Добавить момент</a>
+      </div>
     </div>
   </section>
 
@@ -52,7 +56,15 @@
   </section>
 
   {% if show_invite %}
-    <section class="event-time-card" data-inline-countdown data-invite-start="{{ event.starts_at|date:'c' }}">
+    <section
+      class="event-time-card invite-trigger-card"
+      data-inline-countdown
+      data-invite-open
+      data-invite-start="{{ event.starts_at|date:'c' }}"
+      role="button"
+      tabindex="0"
+      aria-label="Открыть приглашение"
+    >
       <div>
         <p class="eyebrow">Приглашение активно</p>
         <h2>Той еще впереди</h2>
@@ -94,11 +106,57 @@
     </label>
     <p class="table-search-result" id="tableSearchResult">Введите имя гостя, чтобы подсветить его стол.</p>
 
-    <div class="floor-map" data-table-map>
+    <div class="venue-floor-plan kazakh-floor-plan" data-table-map aria-label="План зала и рассадка гостей">
+      <div class="hall-wall hall-wall-top" aria-hidden="true"></div>
+      <div class="hall-wall hall-wall-left" aria-hidden="true"></div>
+      <div class="hall-wall hall-wall-right" aria-hidden="true"></div>
+      <div class="hall-wall hall-wall-bottom-left" aria-hidden="true"></div>
+      <div class="hall-wall hall-wall-bottom-right" aria-hidden="true"></div>
+      <div class="floral-corner floral-top-left" aria-hidden="true"></div>
+      <div class="floral-corner floral-top-right" aria-hidden="true"></div>
+      <div class="floral-corner floral-left-one" aria-hidden="true"></div>
+      <div class="floral-corner floral-right-one" aria-hidden="true"></div>
+      <div class="floral-corner floral-bottom-left" aria-hidden="true"></div>
+      <div class="floral-corner floral-bottom-right" aria-hidden="true"></div>
+
+      <div class="venue-zone venue-couple-table">
+        <span>BRIDE & GROOM TABLE</span>
+        <strong>{{ event.bride_name }} & {{ event.groom_name }}</strong>
+      </div>
+      <div class="venue-zone venue-entrance">
+        <span>ENTRANCE</span>
+      </div>
+      <div class="venue-aisle venue-aisle-main" aria-hidden="true"></div>
+
       {% for table in tables %}
         {% with guest_count=table.guests.all|length %}
           <button
-            class="table-circle {% if table.is_vip %}is-vip{% endif %}"
+            class="venue-table {% if table.is_vip %}is-vip{% endif %}"
+            {% if forloop.counter == 1 %}
+              style="--toy-x: 28%; --toy-y: 36%;"
+            {% elif forloop.counter == 2 %}
+              style="--toy-x: 28%; --toy-y: 55%;"
+            {% elif forloop.counter == 3 %}
+              style="--toy-x: 28%; --toy-y: 74%;"
+            {% elif forloop.counter == 4 %}
+              style="--toy-x: 41%; --toy-y: 36%;"
+            {% elif forloop.counter == 5 %}
+              style="--toy-x: 41%; --toy-y: 55%;"
+            {% elif forloop.counter == 6 %}
+              style="--toy-x: 41%; --toy-y: 74%;"
+            {% elif forloop.counter == 7 %}
+              style="--toy-x: 59%; --toy-y: 36%;"
+            {% elif forloop.counter == 8 %}
+              style="--toy-x: 59%; --toy-y: 55%;"
+            {% elif forloop.counter == 9 %}
+              style="--toy-x: 59%; --toy-y: 74%;"
+            {% elif forloop.counter == 10 %}
+              style="--toy-x: 72%; --toy-y: 36%;"
+            {% elif forloop.counter == 11 %}
+              style="--toy-x: 72%; --toy-y: 55%;"
+            {% elif forloop.counter == 12 %}
+              style="--toy-x: 72%; --toy-y: 74%;"
+            {% endif %}
             type="button"
             data-table-open="table-{{ table.id }}"
             data-table-number="{{ table.number }}"
@@ -108,16 +166,26 @@
             data-capacity="{{ table.capacity }}"
             aria-label="Открыть стол №{{ table.number }} {{ table.name }}"
           >
-            <span class="table-pulse"></span>
-            <span class="chair-ring" aria-hidden="true">
-              <i></i><i></i><i></i><i></i><i></i>
-              <i></i><i></i><i></i><i></i><i></i>
+            <span class="venue-chair-ring" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i>
             </span>
-            <span class="table-photo"></span>
-            <span class="table-overlay"></span>
-            <span class="table-content">
+            <span class="venue-table-shape" aria-hidden="true"></span>
+            <span class="venue-table-content">
               <b>{{ table.number }}</b>
               <small>{{ table.name }}</small>
+            </span>
+            <span class="venue-table-meta">{{ guest_count }}/{{ table.capacity }}</span>
+            <span class="venue-table-popover" role="tooltip">
+              <strong>{{ table.name }}</strong>
+              <small>{% if table.is_vip %}VIP / Family table{% else %}Guest table{% endif %} · {{ guest_count }} из {{ table.capacity }}</small>
+              <span>
+                {% for table_guest in table.guests.all|slice:":4" %}
+                  {{ table_guest.display_name|default:table_guest.nickname }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  Пока нет гостей
+                {% endfor %}
+              </span>
             </span>
           </button>
         {% endwith %}
