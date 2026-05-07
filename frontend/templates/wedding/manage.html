@@ -1,0 +1,153 @@
+{% extends "wedding/base.html" %}
+{% block title %}Управление · {{ event.title }}{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <p class="eyebrow">{{ event.title }}</p>
+    <h1>Управление</h1>
+    <p>Одобряйте заявки гостей прямо в приложении.</p>
+    <a class="secondary-button studio-link-button" href="{% url 'wedding:studio' %}">Studio</a>
+  </header>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>Заявки</h2>
+      <span>{{ pending_requests|length }}</span>
+    </div>
+
+    <div class="manage-list">
+      {% for upload_request in pending_requests %}
+        <article class="manage-card">
+          <div class="manage-card-head">
+            <span class="avatar">
+              {% if upload_request.guest.avatar %}
+                <img src="{{ upload_request.guest.avatar.url }}" alt="{{ upload_request.guest }}">
+              {% else %}
+                <span>{{ upload_request.guest.initials }}</span>
+              {% endif %}
+            </span>
+            <div>
+              <h2>{{ upload_request.guest.display_name|default:upload_request.guest.nickname }}</h2>
+              <p>@{{ upload_request.guest.nickname }} · {{ upload_request.created_at|date:"d E, H:i" }}</p>
+            </div>
+          </div>
+
+          {% if upload_request.message %}
+            <blockquote>{{ upload_request.message }}</blockquote>
+          {% else %}
+            <blockquote>Гость просит открыть доступ к загрузке фото и видео.</blockquote>
+          {% endif %}
+
+          <div class="manage-actions">
+            <form method="post" action="{% url 'wedding:approve_upload_access' upload_request.id %}">
+              {% csrf_token %}
+              <button class="primary-button" type="submit">Одобрить</button>
+            </form>
+            <form method="post" action="{% url 'wedding:reject_upload_access' upload_request.id %}">
+              {% csrf_token %}
+              <button class="secondary-button" type="submit">Отклонить</button>
+            </form>
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state">Новых заявок пока нет.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>Добавить гостя</h2>
+      <span>Стол</span>
+    </div>
+    <form method="post" action="{% url 'wedding:add_guest_to_table' %}" class="host-form-card">
+      {% csrf_token %}
+      <label>
+        <span>Имя и фамилия</span>
+        {{ guest_form.display_name }}
+      </label>
+      <label>
+        <span>Стол</span>
+        {{ guest_form.table }}
+      </label>
+      <button class="primary-button" type="submit">Добавить за стол</button>
+    </form>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>Медиа</h2>
+      <span>{{ media_posts|length }}</span>
+    </div>
+    <div class="manage-media-list">
+      {% for post in media_posts %}
+        <article class="manage-media-card">
+          <div class="manage-media-preview">
+            {% if post.media_type == "video" %}
+              <video src="{{ post.media_url }}" muted playsinline></video>
+            {% else %}
+              <img src="{{ post.media_url }}" alt="{{ post.caption }}">
+            {% endif %}
+          </div>
+          <div class="manage-media-info">
+            <b>@{{ post.author.nickname }}</b>
+            <small>{{ post.created_at|date:"d E, H:i" }}</small>
+            {% if post.caption %}<p>{{ post.caption }}</p>{% endif %}
+          </div>
+          <form method="post" action="{% url 'wedding:delete_media_post' post.id %}" data-confirm-delete>
+            {% csrf_token %}
+            <button class="danger-button" type="submit">Удалить</button>
+          </form>
+        </article>
+      {% empty %}
+        <div class="empty-state">В альбоме пока нет медиа.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>Авторы</h2>
+      <span>{{ authors|length }}</span>
+    </div>
+    <div class="author-list compact-author-list">
+      {% for author in authors %}
+        <a class="author-row" href="{% url 'wedding:author_detail' author.id %}">
+          <span class="avatar">
+            {% if author.avatar %}
+              <img src="{{ author.avatar.url }}" alt="{{ author }}">
+            {% else %}
+              <span>{{ author.initials }}</span>
+            {% endif %}
+          </span>
+          <span>
+            <b>@{{ author.nickname }}</b>
+            <small>{% if author.is_host %}Админ тоя{% else %}Может загружать{% endif %}</small>
+          </span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      {% empty %}
+        <div class="empty-state">Пока нет авторов.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if recent_requests %}
+    <section class="section">
+      <div class="section-title">
+        <h2>История</h2>
+        <span>{{ recent_requests|length }}</span>
+      </div>
+      <div class="history-list">
+        {% for upload_request in recent_requests %}
+          <div class="history-row">
+            <span>
+              <b>@{{ upload_request.guest.nickname }}</b>
+              <small>{{ upload_request.reviewed_at|date:"d E, H:i"|default:upload_request.created_at|date:"d E, H:i" }}</small>
+            </span>
+            <strong class="status-pill status-{{ upload_request.status }}">{{ upload_request.get_status_display }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

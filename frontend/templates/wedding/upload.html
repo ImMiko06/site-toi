@@ -1,0 +1,74 @@
+{% extends "wedding/base.html" %}
+{% block title %}Создать контент · {{ event.title }}{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <p class="eyebrow">{{ event.title }}</p>
+    <h1>Создать контент</h1>
+    <p>{% if can_upload %}Добавьте фото или видео в живую ленту.{% else %}Сейчас сайт работает как архив.{% endif %}</p>
+  </header>
+
+  {% if can_upload %}
+    <form method="post" enctype="multipart/form-data" class="upload-card">
+      {% csrf_token %}
+      <label>
+        <span>Тип файла</span>
+        {{ form.media_type }}
+      </label>
+      <label class="file-drop">
+        <input id="id_file" name="file" type="file" accept="image/*,video/*" required>
+        <span class="plus-circle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        <b>Выбрать из галереи</b>
+        <small id="fileName">Фото или короткое видео</small>
+      </label>
+      <div id="uploadPreview" class="upload-preview"></div>
+      <label>
+        <span>Подпись</span>
+        {{ form.caption }}
+      </label>
+      <button class="primary-button" type="submit">Опубликовать</button>
+    </form>
+  {% else %}
+    <section class="locked-card">
+      <h2>Архивный режим</h2>
+      <p>Чтобы добавить фото или видео вне времени тоя, отправьте заявку админу. После одобрения здесь появится форма загрузки.</p>
+      <span>{{ event.upload_start|date:"d E, H:i" }} - {{ event.upload_end|date:"d E, H:i" }}</span>
+    </section>
+
+    <section class="access-request-card">
+      {% if pending_request %}
+        <p class="eyebrow">Заявка отправлена</p>
+        <h2>Ожидает одобрения</h2>
+        <p>Админ увидит ваш запрос в панели управления. После одобрения кнопка загрузки станет доступна автоматически.</p>
+        {% if pending_request.message %}
+          <blockquote>{{ pending_request.message }}</blockquote>
+        {% endif %}
+      {% elif latest_request and latest_request.status == "rejected" %}
+        <p class="eyebrow">Запрос рассмотрен</p>
+        <h2>Можно отправить снова</h2>
+        <p>Предыдущая заявка была отклонена. Добавьте короткое пояснение и отправьте новый запрос.</p>
+        <form method="post" action="{% url 'wedding:request_upload_access' %}" class="request-form">
+          {% csrf_token %}
+          <label>
+            <span>Сообщение админу</span>
+            {{ request_form.message }}
+          </label>
+          <button class="primary-button" type="submit">Запросить доступ</button>
+        </form>
+      {% else %}
+        <p class="eyebrow">Доступ автора</p>
+        <h2>Запросить загрузку</h2>
+        <p>Отправьте запрос, если хотите добавить фото или видео в архив после завершения основного окна загрузки.</p>
+        <form method="post" action="{% url 'wedding:request_upload_access' %}" class="request-form">
+          {% csrf_token %}
+          <label>
+            <span>Сообщение админу</span>
+            {{ request_form.message }}
+          </label>
+          <button class="primary-button" type="submit">Запросить доступ</button>
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}

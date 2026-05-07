@@ -1,0 +1,84 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{% block title %}{{ event.title }}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'wedding/css/app.css' %}?v=home-feed-1">
+    <script defer src="{% static 'wedding/js/app.js' %}?v=home-feed-1"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message message-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    {% if show_invite %}
+      <div
+        class="invite-modal"
+        data-invite-modal
+        data-invite-key="invite-{{ event.slug }}-{{ event.starts_at|date:'U' }}"
+        data-invite-start="{{ event.starts_at|date:'c' }}"
+      >
+        <div class="invite-card">
+          <button class="icon-button invite-close" type="button" data-invite-close aria-label="Скрыть">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+          <p class="eyebrow">{{ event.title }}</p>
+          <h2>{{ event.invitation_title|default:"Электронный пригласительный" }}</h2>
+          <p>{{ event.invitation_text }}</p>
+          <div class="invite-countdown" data-countdown>
+            <span><b data-countdown-days>00</b><small>дней</small></span>
+            <span><b data-countdown-hours>00</b><small>часов</small></span>
+            <span><b data-countdown-minutes>00</b><small>минут</small></span>
+          </div>
+          <div class="invite-line"></div>
+          <span>{{ event.starts_at|date:"d E, H:i" }} · {{ event.venue_name }} · {{ event.venue_address }}</span>
+        </div>
+      </div>
+    {% endif %}
+
+    <nav class="bottom-nav" aria-label="Основная навигация">
+      <a class="nav-item {% if active == 'home' %}is-active{% endif %}" href="{% url 'wedding:home' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        <span>Главная</span>
+      </a>
+      <a class="nav-item {% if active == 'album' %}is-active{% endif %}" href="{% url 'wedding:album' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><circle cx="8" cy="10" r="2"/><path d="m21 16-5-5L5 21"/></svg>
+        <span>Альбом</span>
+      </a>
+      <a class="nav-item nav-plus {% if active == 'upload' %}is-active{% endif %}" href="{% url 'wedding:upload' %}">
+        <span class="plus-circle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        <span>Создать</span>
+      </a>
+      {% if guest.is_host %}
+        <a class="nav-item {% if active == 'manage' %}is-active{% endif %}" href="{% url 'wedding:manage' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 7v6c0 5-3.4 7.7-8 8-4.6-.3-8-3-8-8V7Z"/><path d="m9 12 2 2 4-5"/></svg>
+          <span>Упр.</span>
+        </a>
+      {% else %}
+        <a class="nav-item {% if active == 'authors' %}is-active{% endif %}" href="{% url 'wedding:authors' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.5-4.5"/></svg>
+          <span>Авторы</span>
+        </a>
+      {% endif %}
+      <a class="nav-item {% if active == 'account' %}is-active{% endif %}" href="{% url 'wedding:account' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span>Аккаунт</span>
+      </a>
+    </nav>
+  </body>
+</html>

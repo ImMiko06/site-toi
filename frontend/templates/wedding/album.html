@@ -1,0 +1,88 @@
+{% extends "wedding/base.html" %}
+{% block title %}Альбом · {{ event.title }}{% endblock %}
+{% block content %}
+  <header class="page-header">
+    <p class="eyebrow">{{ event.title }}</p>
+    <h1>Фотоальбом</h1>
+    <a class="icon-button header-action" href="{% url 'wedding:authors' %}" aria-label="Поиск авторов">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.5-4.5"/></svg>
+    </a>
+  </header>
+
+  <div class="segmented">
+    <a class="{% if sort != 'popular' %}is-active{% endif %}" href="{% url 'wedding:album' %}?sort=feed">Лента</a>
+    <a class="{% if sort == 'popular' %}is-active{% endif %}" href="{% url 'wedding:album' %}?sort=popular">Популярное</a>
+  </div>
+
+  <section class="feed">
+    {% for post in posts %}
+      <article class="post-card" data-post-card>
+        <header class="post-author">
+          <a class="avatar" href="{% url 'wedding:author_detail' post.author.id %}">
+            {% if post.author.avatar %}
+              <img src="{{ post.author.avatar.url }}" alt="{{ post.author }}">
+            {% else %}
+              <span>{{ post.author.initials }}</span>
+            {% endif %}
+          </a>
+          <div>
+            <a href="{% url 'wedding:author_detail' post.author.id %}">@{{ post.author.nickname }}</a>
+            <p>{{ post.created_at|timesince }} назад</p>
+          </div>
+        </header>
+
+        <div class="post-media">
+          {% if post.media_type == "video" %}
+            <video src="{{ post.media_url }}" controls playsinline></video>
+          {% else %}
+            <img src="{{ post.media_url }}" alt="{{ post.caption }}">
+          {% endif %}
+        </div>
+
+        <div class="post-body">
+          {% if post.caption %}<p>{{ post.caption }}</p>{% endif %}
+          <div class="post-actions">
+            <form method="post" action="{% url 'wedding:toggle_like' post.id %}" data-like-form>
+              {% csrf_token %}
+              <button class="text-button {% if post.id in liked_ids %}is-liked{% endif %}" type="submit">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.7 0L12 5.7l-1.1-1.1a5.4 5.4 0 0 0-7.7 7.7L12 21l8.8-8.7a5.4 5.4 0 0 0 0-7.7Z"/></svg>
+                <span data-like-count>{{ post.likes_count }}</span>
+              </button>
+            </form>
+            <button class="text-button" type="button" data-comment-toggle aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.8 8.8 0 0 1-3-.5L3 21l1.7-5.6a8.2 8.2 0 0 1-.7-3.3 8.5 8.5 0 0 1 17-.6Z"/></svg>
+              <span data-comment-count>{{ post.comments_count }}</span>
+            </button>
+            {% if guest.is_host %}
+              <form method="post" action="{% url 'wedding:delete_media_post' post.id %}" data-confirm-delete>
+                {% csrf_token %}
+                <button class="text-button danger-text-button" type="submit">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                  Удалить
+                </button>
+              </form>
+            {% endif %}
+          </div>
+
+          <div class="comment-panel" data-comment-panel hidden>
+            <div class="comments" data-comments-list>
+              {% for comment in post.comments.all %}
+                {% if comment.status == "visible" %}
+                  <p><b>@{{ comment.guest.nickname }}</b> {{ comment.body }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <form class="comment-form" method="post" action="{% url 'wedding:add_comment' post.id %}" data-comment-form>
+              {% csrf_token %}
+              {{ comment_form.body }}
+              <button type="submit">OK</button>
+            </form>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state">Пока нет постов. Первый красивый кадр может быть вашим.</div>
+    {% endfor %}
+  </section>
+{% endblock %}

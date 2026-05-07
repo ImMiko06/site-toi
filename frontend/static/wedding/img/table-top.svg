@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <defs>
+    <radialGradient id="cloth" cx="50%" cy="48%" r="62%">
+      <stop offset="0" stop-color="#f8f1e8"/>
+      <stop offset=".72" stop-color="#d8c29d"/>
+      <stop offset="1" stop-color="#9f8358"/>
+    </radialGradient>
+    <radialGradient id="plate" cx="50%" cy="46%" r="52%">
+      <stop offset="0" stop-color="#fffaf1"/>
+      <stop offset="1" stop-color="#d4c0a0"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#4a4036" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="320" height="320" fill="#4a4036"/>
+  <circle cx="160" cy="160" r="148" fill="url(#cloth)"/>
+  <circle cx="160" cy="160" r="116" fill="none" stroke="#fff7ec" stroke-width="3" opacity=".68"/>
+  <circle cx="160" cy="160" r="68" fill="#c5a880" opacity=".2"/>
+  <g filter="url(#shadow)">
+    <g transform="translate(160 58)">
+      <circle r="29" fill="url(#plate)"/>
+      <circle r="19" fill="none" stroke="#c5a880" stroke-width="2"/>
+      <path d="M-42 0h18M24 0h42" stroke="#fdfbf7" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(262 160) rotate(90)">
+      <circle r="29" fill="url(#plate)"/>
+      <circle r="19" fill="none" stroke="#c5a880" stroke-width="2"/>
+      <path d="M-42 0h18M24 0h42" stroke="#fdfbf7" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(160 262) rotate(180)">
+      <circle r="29" fill="url(#plate)"/>
+      <circle r="19" fill="none" stroke="#c5a880" stroke-width="2"/>
+      <path d="M-42 0h18M24 0h42" stroke="#fdfbf7" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(58 160) rotate(270)">
+      <circle r="29" fill="url(#plate)"/>
+      <circle r="19" fill="none" stroke="#c5a880" stroke-width="2"/>
+      <path d="M-42 0h18M24 0h42" stroke="#fdfbf7" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </g>
+  <g opacity=".72">
+    <path d="M92 92l22 22M228 92l-22 22M228 228l-22-22M92 228l22-22" stroke="#fff7ec" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="160" cy="160" r="28" fill="#fff7ec" opacity=".42"/>
+    <circle cx="160" cy="160" r="10" fill="#c5a880"/>
+  </g>
+</svg>

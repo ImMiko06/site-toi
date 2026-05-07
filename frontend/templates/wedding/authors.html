@@ -1,0 +1,37 @@
+{% extends "wedding/base.html" %}
+{% block title %}Авторы · {{ event.title }}{% endblock %}
+{% block content %}
+  <header class="page-header with-mark">
+    <div class="page-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.5-4.5"/></svg>
+    </div>
+    <p class="eyebrow">{{ event.title }}</p>
+    <h1>Авторы</h1>
+  </header>
+
+  <form class="search-form" method="get">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.5-4.5"/></svg>
+    <input name="q" value="{{ query }}" placeholder="Поиск по никнейму">
+  </form>
+
+  <section class="author-list">
+    {% for author in authors %}
+      <a class="author-row" href="{% url 'wedding:author_detail' author.id %}">
+        <span class="avatar">
+          {% if author.avatar %}
+            <img src="{{ author.avatar.url }}" alt="{{ author }}">
+          {% else %}
+            <span>{{ author.initials }}</span>
+          {% endif %}
+        </span>
+        <span>
+          <b>@{{ author.nickname }}</b>
+          <small>{{ author.posts_count }} файлов</small>
+        </span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    {% empty %}
+      <div class="empty-state">Авторов по такому поиску нет.</div>
+    {% endfor %}
+  </section>
+{% endblock %}

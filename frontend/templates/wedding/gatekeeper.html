@@ -1,0 +1,39 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Вход · {{ event.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'wedding/css/app.css' %}">
+  </head>
+  <body class="gate-body">
+    <main class="gate-shell">
+      <section class="gate-card">
+        <p class="eyebrow">{{ event.title }}</p>
+        <h1>Свадебный альбом</h1>
+        <p class="muted">Войдите по никнейму и паролю. Пароль должен быть минимум 6 символов.</p>
+
+        <form method="post" class="form-stack">
+          {% csrf_token %}
+          <label>
+            <span>Никнейм</span>
+            {{ form.nickname }}
+            {{ form.nickname.errors }}
+          </label>
+          <label>
+            <span>Пароль</span>
+            {{ form.password }}
+            {{ form.password.errors }}
+          </label>
+          <button class="primary-button" type="submit">Войти</button>
+        </form>
+
+        <p class="tiny-note">Для демо можно войти как <b>aigerim</b> / <b>wedding123</b> или создать новый ник.</p>
+      </section>
+    </main>
+  </body>
+</html>

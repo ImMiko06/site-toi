@@ -1,0 +1,36 @@
+{% extends "wedding/base.html" %}
+{% block title %}@{{ author.nickname }} · {{ event.title }}{% endblock %}
+{% block content %}
+  <a class="back-link" href="{% url 'wedding:authors' %}">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    Авторы
+  </a>
+
+  <section class="profile-head">
+    <span class="avatar avatar-large">
+      {% if author.avatar %}
+        <img src="{{ author.avatar.url }}" alt="{{ author }}">
+      {% else %}
+        <span>{{ author.initials }}</span>
+      {% endif %}
+    </span>
+    <div>
+      <h1>{{ author.display_name|default:author.nickname }}</h1>
+      <p>@{{ author.nickname }}</p>
+    </div>
+  </section>
+
+  <section class="media-grid">
+    {% for post in posts %}
+      <a class="grid-tile" href="{% url 'wedding:album' %}">
+        {% if post.media_type == "video" %}
+          <video src="{{ post.media_url }}" muted playsinline></video>
+        {% else %}
+          <img src="{{ post.media_url }}" alt="{{ post.caption }}">
+        {% endif %}
+      </a>
+    {% empty %}
+      <div class="empty-state">У автора пока нет файлов.</div>
+    {% endfor %}
+  </section>
+{% endblock %}

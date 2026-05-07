@@ -1,0 +1,45 @@
+{% extends "wedding/base.html" %}
+{% block title %}Аккаунт · {{ event.title }}{% endblock %}
+{% block content %}
+  <section class="profile-head">
+    <span class="avatar avatar-large">
+      {% if guest.avatar %}
+        <img src="{{ guest.avatar.url }}" alt="{{ guest }}">
+      {% else %}
+        <span>{{ guest.initials }}</span>
+      {% endif %}
+    </span>
+    <div>
+      <h1>{{ guest.display_name|default:guest.nickname }}</h1>
+      <p>@{{ guest.nickname }}</p>
+      <small>{% if can_upload %}Есть доступ к загрузке{% else %}Только просмотр и лайки{% endif %}</small>
+    </div>
+  </section>
+
+  <div class="account-actions">
+    {% if guest.is_host %}
+      <a class="primary-button" href="{% url 'wedding:manage' %}">Управление тоем</a>
+    {% endif %}
+    <a class="secondary-button" href="{% url 'wedding:logout' %}">Выйти</a>
+  </div>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>Мои файлы</h2>
+      <span>{{ posts|length }}</span>
+    </div>
+    <div class="media-grid">
+      {% for post in posts %}
+        <a class="grid-tile" href="{% url 'wedding:album' %}">
+          {% if post.media_type == "video" %}
+            <video src="{{ post.media_url }}" muted playsinline></video>
+          {% else %}
+            <img src="{{ post.media_url }}" alt="{{ post.caption }}">
+          {% endif %}
+        </a>
+      {% empty %}
+        <div class="empty-state">Вы еще ничего не загружали.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

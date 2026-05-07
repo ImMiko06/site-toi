@@ -1,0 +1,156 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Studio · {{ event.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'studio/studio.css' %}?v=1">
+    <script defer src="{% static 'studio/studio.js' %}?v=1"></script>
+  </head>
+  <body>
+    <div class="studio-shell" data-move-url="{% url 'wedding:move_guest_table' %}" data-entry-url="{{ entry_url }}">
+      {% csrf_token %}
+      <header class="studio-topbar">
+        <a class="icon-link" href="{% url 'wedding:manage' %}" aria-label="Назад">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <div>
+          <p class="eyebrow">{{ event.title }}</p>
+          <h1>Toi Studio</h1>
+        </div>
+        <nav class="studio-tabs" aria-label="Studio">
+          <button class="is-active" type="button" data-tab="seating">Рассадка</button>
+          <button type="button" data-tab="qr">QR</button>
+          <button type="button" data-tab="invite">Приглашение</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="studio-view is-active" data-view="seating">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Конструктор</p>
+              <h2>Рассадка гостей</h2>
+            </div>
+            <div class="stats-row">
+              <span><b>{{ seated_guests }}</b><small>за столами</small></span>
+              <span><b>{{ total_guests }}</b><small>всего гостей</small></span>
+            </div>
+          </div>
+
+          <p class="studio-note">Перетащите гостя в другой стол или выберите стол в списке рядом с именем.</p>
+          <div class="studio-alert" data-studio-alert hidden></div>
+
+          <div class="seating-board">
+            {% for table in tables %}
+              <article class="table-panel" data-table-id="{{ table.id }}">
+                <header>
+                  <span class="table-number">{{ table.number }}</span>
+                  <div>
+                    <h3>{{ table.name }}</h3>
+                    <small><b data-table-count="{{ table.id }}">{{ table.guests.all|length }}</b> из {{ table.capacity }} мест</small>
+                  </div>
+                </header>
+                <div class="table-dropzone" data-drop-table="{{ table.id }}">
+                  {% for seated_guest in table.guests.all %}
+                    <div class="guest-chip" draggable="true" data-guest-id="{{ seated_guest.id }}">
+                      <span>{{ seated_guest.initials }}</span>
+                      <b>{{ seated_guest.display_name|default:seated_guest.nickname }}</b>
+                      <select data-guest-move="{{ seated_guest.id }}" aria-label="Переместить гостя">
+                        {% for option_table in tables %}
+                          <option value="{{ option_table.id }}" {% if option_table.id == table.id %}selected{% endif %}>{{ option_table.number }} · {{ option_table.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  {% empty %}
+                    <p class="empty-drop">Свободный стол</p>
+                  {% endfor %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="studio-view" data-view="qr">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Гости</p>
+              <h2>QR для входа</h2>
+            </div>
+            <button class="secondary-action" type="button" data-print-qr>Печать</button>
+          </div>
+
+          <div class="qr-layout">
+            <article class="qr-card" data-qr-card>
+              <p class="eyebrow">{{ event.title }}</p>
+              <h3>Сканируйте, чтобы открыть сайт</h3>
+              <img data-qr-image src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=12&data={{ entry_url|urlencode }}" alt="QR код">
+              <strong>{{ event.groom_name }} & {{ event.bride_name }}</strong>
+              <small>{{ event.starts_at|date:"d E, H:i" }} · {{ event.venue_name }}</small>
+            </article>
+
+            <aside class="tool-panel">
+              <label>
+                <span>Ссылка</span>
+                <input data-qr-url value="{{ entry_url }}">
+              </label>
+              <div class="action-grid">
+                <button class="primary-action" type="button" data-update-qr>Обновить QR</button>
+                <button class="secondary-action" type="button" data-copy-link>Скопировать</button>
+              </div>
+              <p class="studio-note">Эту карточку можно показать гостям или распечатать для столов.</p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="studio-view" data-view="invite">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow">Превью</p>
+              <h2>Электронное приглашение</h2>
+            </div>
+          </div>
+
+          <div class="invite-layout">
+            <article class="invite-preview">
+              <div class="invite-art">
+                <span data-preview-date>{{ event.starts_at|date:"d.m.Y" }}</span>
+              </div>
+              <p class="eyebrow" data-preview-place>{{ event.venue_name }}</p>
+              <h3><span data-preview-groom>{{ event.groom_name }}</span> & <span data-preview-bride>{{ event.bride_name }}</span></h3>
+              <p data-preview-text>{{ event.invitation_text }}</p>
+              <small>{{ entry_url }}</small>
+            </article>
+
+            <aside class="tool-panel">
+              <label>
+                <span>Жених</span>
+                <input data-invite-field="groom" value="{{ event.groom_name }}">
+              </label>
+              <label>
+                <span>Невеста</span>
+                <input data-invite-field="bride" value="{{ event.bride_name }}">
+              </label>
+              <label>
+                <span>Место</span>
+                <input data-invite-field="place" value="{{ event.venue_name }}">
+              </label>
+              <label>
+                <span>Дата</span>
+                <input data-invite-field="date" value="{{ event.starts_at|date:'d.m.Y' }}">
+              </label>
+              <label>
+                <span>Текст</span>
+                <textarea data-invite-field="text" rows="4">{{ event.invitation_text }}</textarea>
+              </label>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

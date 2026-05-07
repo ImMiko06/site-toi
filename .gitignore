@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+
+.env
+.venv/
+.vendor/
+.pip-tmp/
+
+google-drive-token.json
+client_secret*.json
+toi-uploader*.json
+
+media/
+staticfiles/
+server*.log
