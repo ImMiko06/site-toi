@@ -2704,7 +2704,7 @@ select:focus {
     grid-column: 1;
     width: min(46vw, 520px);
     color: var(--ink);
-    content: "Аружан & Нурдаулет";
+    content: "Aruzhan & Nurdaulet";
     font-family: "Cormorant Garamond", Georgia, serif;
     font-size: 76px;
     font-weight: 700;

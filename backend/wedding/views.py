@@ -67,9 +67,9 @@ def get_default_event():
     event, created = WeddingEvent.objects.get_or_create(
         slug="aruzhan-dias",
         defaults={
-            "title": "Аружан & Нурдаулет",
-            "groom_name": "Нурдаулет",
-            "bride_name": "Аружан",
+            "title": "Aruzhan & Nurdaulet",
+            "groom_name": "Nurdaulet",
+            "bride_name": "Aruzhan",
             "venue_name": "Royal Hall",
             "venue_address": "Almaty",
             "starts_at": demo_starts_at,
@@ -94,9 +94,9 @@ def get_default_event():
 
 def ensure_event_details(event):
     updates = {
-        "title": "Аружан & Нурдаулет",
-        "groom_name": "Нурдаулет",
-        "bride_name": "Аружан",
+        "title": "Aruzhan & Nurdaulet",
+        "groom_name": "Nurdaulet",
+        "bride_name": "Aruzhan",
         "venue_name": "Royal Hall",
         "venue_address": "Алматы, проспект Аль-Фараби 77/7",
         "invitation_title": "Приглашение на той",
