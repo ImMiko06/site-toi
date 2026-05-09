@@ -42,6 +42,10 @@ class WeddingEvent(models.Model):
     couple_photo = models.FileField(upload_to=event_asset_path, blank=True)
     archive_cover = models.FileField(upload_to=event_asset_path, blank=True)
     videographer_film_url = models.URLField(blank=True)
+    guest_uploads_enabled = models.BooleanField(
+        default=True,
+        help_text="When disabled, only host guests can upload media.",
+    )
     is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -152,6 +156,10 @@ class WeddingGuest(models.Model):
 
     def can_upload(self, at=None):
         if not self.is_active:
+            return False
+        if self.is_host:
+            return True
+        if not self.event.guest_uploads_enabled:
             return False
         if self.upload_override == self.UploadOverride.ALLOW:
             return True

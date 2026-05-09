@@ -665,6 +665,10 @@ def upload(request):
 @require_POST
 @require_guest
 def request_upload_access(request):
+    if not request.wedding_event.guest_uploads_enabled and not request.wedding_guest.is_host:
+        messages.error(request, "Админ временно закрыл загрузку фото и видео для гостей.")
+        return redirect("wedding:upload")
+
     if request.wedding_guest.can_upload():
         messages.info(request, "У вас уже есть доступ к созданию контента.")
         return redirect("wedding:upload")
@@ -728,6 +732,20 @@ def manage(request):
         "media_posts": media_posts,
     }
     return render(request, "wedding/manage.html", context)
+
+
+@require_POST
+@require_host_guest
+def toggle_guest_uploads(request):
+    event = request.wedding_event
+    event.guest_uploads_enabled = request.POST.get("enabled") == "1"
+    event.save(update_fields=["guest_uploads_enabled", "updated_at"])
+
+    if event.guest_uploads_enabled:
+        messages.success(request, "Загрузка фото и видео для гостей включена.")
+    else:
+        messages.success(request, "Загрузка фото и видео для гостей выключена.")
+    return redirect("wedding:manage")
 
 
 @require_POST

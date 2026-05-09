@@ -10,6 +10,37 @@
 
   <section class="section">
     <div class="section-title">
+      <h2>Доступ к загрузке</h2>
+      <span>{% if event.guest_uploads_enabled %}Включено{% else %}Выключено{% endif %}</span>
+    </div>
+    <article class="manage-card upload-access-card">
+      <div class="manage-card-head">
+        <span class="avatar"><span>{% if event.guest_uploads_enabled %}✓{% else %}×{% endif %}</span></span>
+        <div>
+          <h2>{% if event.guest_uploads_enabled %}Гости могут загружать{% else %}Гости не могут загружать{% endif %}</h2>
+          <p>Админ всё равно сможет добавлять фото и видео.</p>
+        </div>
+      </div>
+      <div class="manage-actions">
+        {% if event.guest_uploads_enabled %}
+          <form method="post" action="{% url 'wedding:toggle_guest_uploads' %}">
+            {% csrf_token %}
+            <input type="hidden" name="enabled" value="0">
+            <button class="danger-button" type="submit">Убрать доступ у гостей</button>
+          </form>
+        {% else %}
+          <form method="post" action="{% url 'wedding:toggle_guest_uploads' %}">
+            {% csrf_token %}
+            <input type="hidden" name="enabled" value="1">
+            <button class="primary-button" type="submit">Открыть доступ гостям</button>
+          </form>
+        {% endif %}
+      </div>
+    </article>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
       <h2>Заявки</h2>
       <span>{{ pending_requests|length }}</span>
     </div>

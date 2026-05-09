@@ -14,8 +14,8 @@ from .models import (
 
 @admin.register(WeddingEvent)
 class WeddingEventAdmin(admin.ModelAdmin):
-    list_display = ("title", "starts_at", "upload_start", "upload_end", "is_published")
-    list_filter = ("is_published",)
+    list_display = ("title", "starts_at", "upload_start", "upload_end", "guest_uploads_enabled", "is_published")
+    list_filter = ("guest_uploads_enabled", "is_published")
     prepopulated_fields = {"slug": ("title",)}
 
 

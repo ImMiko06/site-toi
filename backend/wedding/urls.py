@@ -19,6 +19,7 @@ urlpatterns = [
     path("upload/request-access/", views.request_upload_access, name="request_upload_access"),
     path("account/", views.account, name="account"),
     path("manage/", views.manage, name="manage"),
+    path("manage/uploads/toggle/", views.toggle_guest_uploads, name="toggle_guest_uploads"),
     path("manage/guests/add/", views.add_guest_to_table, name="add_guest_to_table"),
     path("manage/guests/<int:guest_id>/remove/", views.remove_guest_from_table, name="remove_guest_from_table"),
     path("manage/upload-requests/<int:request_id>/approve/", views.approve_upload_access, name="approve_upload_access"),

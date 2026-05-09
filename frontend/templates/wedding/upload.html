@@ -31,12 +31,18 @@
     </form>
   {% else %}
     <section class="locked-card">
-      <h2>Архивный режим</h2>
-      <p>Чтобы добавить фото или видео вне времени тоя, отправьте заявку админу. После одобрения здесь появится форма загрузки.</p>
-      <span>{{ event.upload_start|date:"d E, H:i" }} - {{ event.upload_end|date:"d E, H:i" }}</span>
+      {% if not event.guest_uploads_enabled %}
+        <h2>Загрузка закрыта админом</h2>
+        <p>Сейчас гости могут смотреть альбом, ставить лайки и писать комментарии, но не могут добавлять новые фото или видео.</p>
+      {% else %}
+        <h2>Архивный режим</h2>
+        <p>Чтобы добавить фото или видео вне времени тоя, отправьте заявку админу. После одобрения здесь появится форма загрузки.</p>
+        <span>{{ event.upload_start|date:"d E, H:i" }} - {{ event.upload_end|date:"d E, H:i" }}</span>
+      {% endif %}
     </section>
 
-    <section class="access-request-card">
+    {% if event.guest_uploads_enabled %}
+      <section class="access-request-card">
       {% if pending_request %}
         <p class="eyebrow">Заявка отправлена</p>
         <h2>Ожидает одобрения</h2>
@@ -69,6 +75,7 @@
           <button class="primary-button" type="submit">Запросить доступ</button>
         </form>
       {% endif %}
-    </section>
+      </section>
+    {% endif %}
   {% endif %}
 {% endblock %}
